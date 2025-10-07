@@ -7,6 +7,7 @@ import os
 
 load_dotenv()
 token = os.getenv('DISCORD_TOKEN')
+guild_id = os.getenv('GUILD_ID')
 
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
@@ -23,7 +24,7 @@ tree = app_commands.CommandTree(client)
 
 @client.event
 async def on_ready():
-    await tree.sync(guild=discord.Object(id='GUILD_ID'))
+    await tree.sync(guild=discord.Object(id=guild_id))
     print(f"We are ready to go in, {client.user.name}")
 
 # @bot.event
@@ -49,7 +50,7 @@ async def on_ready():
 @tree.command(
     name="hello",
     description="Say hi",
-    guild=discord.Object(id='GUILD_ID')
+    guild=discord.Object(id=guild_id)
 )
 async def first_command(interaction):
     await interaction.response.send_message(f"hi, {interaction.user.mention}")
