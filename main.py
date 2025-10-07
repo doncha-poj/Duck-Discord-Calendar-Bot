@@ -23,7 +23,7 @@ tree = app_commands.CommandTree(client)
 
 @client.event
 async def on_ready():
-    await tree.sync(guild=discord.Object(id=1337627001388793947))
+    await tree.sync(guild=discord.Object(id='GUILD_ID'))
     print(f"We are ready to go in, {client.user.name}")
 
 # @bot.event
@@ -49,7 +49,7 @@ async def on_ready():
 @tree.command(
     name="hello",
     description="Say hi",
-    guild=discord.Object(id=1337627001388793947)
+    guild=discord.Object(id='GUILD_ID')
 )
 async def first_command(interaction):
     await interaction.response.send_message(f"hi, {interaction.user.mention}")
