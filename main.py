@@ -59,7 +59,7 @@ async def daily_poll():
     # Create the native Discord Poll object
     poll = discord.Poll(
         question="good morning 🥰 happy ...",
-        answers=["🚀 Productive work session", "🎮 Relax and play some games", "📚 Study or learn something new"],
+        answers=["answer1", "answer2", "answer3"],
         duration=28800,  # 8 hours (6 AM to 2 PM)
         allow_multiselect=False
     )
