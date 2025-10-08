@@ -8,41 +8,35 @@ import os
 from datetime import time
 from zoneinfo import ZoneInfo
 
-# Setup Config
+# Environment Variables
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD_ID = os.getenv('GUILD_ID')
-POLL_CHANNEL_ID = int(os.getenv('POLL_CHANNEL_ID', 0))
-EASTERN = ZoneInfo("America/New_York")
+GUILD_ID = os.getenv('GUILD_ID') #FIXME: Remove once done
+POLL_CHANNEL_ID = int(os.getenv('POLL_CHANNEL_ID', 0)) #FIXME: Remove
 
-# Logging
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+# Timezone set to US Eastern
+EASTERN = ZoneInfo("America/New_York")
 
 # Initialization
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
-
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
 # Bot Events
 @client.event
 async def on_ready():
-    """
-    This function is called when the bot successfully logs in.
-    """
+    """This function is called when the bot successfully logs in."""
     if not daily_poll.is_running():
         daily_poll.start()
         print("Daily poll task has been started.")
 
     # Sync the application commands to the specified guild
     if GUILD_ID:
-        guild_object = discord.Object(id=GUILD_ID)
-        await tree.sync(guild=guild_object)
+        await tree.sync(guild=discord.Object(id=GUILD_ID)) #FIXME: Remove inside once done testing
         print(f"Commands synced to guild {GUILD_ID}")
 
-    await tree.sync(guild=discord.Object(id=GUILD_ID))
     print(f"We are ready to go in, {client.user.name}")
 
 #TODO: Add api/web scraper for national day calendar
@@ -50,9 +44,7 @@ async def on_ready():
 # Scheduled Polling 
 @tasks.loop(time=time(6, 0, tzinfo=EASTERN))
 async def daily_poll():
-    """
-    A scheduled task to post a poll every day at 6:00 AM EST.
-    """
+    """A scheduled task to post a poll every day at 6:00 AM EST."""
     channel = client.get_channel(POLL_CHANNEL_ID)
     print("It's 6:00 AM, creating a new native daily poll.")
 
@@ -61,7 +53,7 @@ async def daily_poll():
         question="good morning 🥰 happy ...",
         answers=["answer1", "answer2", "answer3"],
         duration=28800,  # 8 hours (6 AM to 2 PM)
-        allow_multiselect=False
+        multiple=False
     )
 
     # Send the poll to the designated channel
@@ -75,7 +67,9 @@ async def daily_poll():
 )
 
 async def test_command(interaction):
+    """A test for slash command"""
     await interaction.response.send_message(f"hi, {interaction.user.mention}")
 
-# Running
+# Running and Logging
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 client.run(TOKEN, log_handler=handler, log_level=logging.DEBUG)
