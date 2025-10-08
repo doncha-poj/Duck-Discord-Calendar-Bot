@@ -36,14 +36,17 @@ async def on_ready():
         daily_poll.start()
         print("Daily poll task has been started.")
 
+#FIXME: Add api/web scraper for national day calendar
 
+#FIXME: add polling logic
+
+# Bot Commands
 @tree.command(
     name="hello",
     description="Say hi",
     guild=discord.Object(id=guild_id)
 )
 
-# Test Command
 async def test_command(interaction):
     await interaction.response.send_message(f"hi, {interaction.user.mention}")
 
