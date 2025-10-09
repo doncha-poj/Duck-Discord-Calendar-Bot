@@ -33,12 +33,12 @@ async def on_ready():
     # Sync the application commands to the specified guild
     if GUILD_ID: #FIXME: remove block later
         await tree.sync(guild=discord.Object(id=GUILD_ID))
-        print(f"Commands synced to guild {GUILD_ID}")
+        print(f"Commands synced to guild: {client.get_guild(int(GUILD_ID)).name}")
 
-    await tree.sync() #FIXME: Uncomment once guild_id is not needed
+    await tree.sync()
     print("Commands synced globally.")
 
-    print(f"{client.user.name} is now online")
+    print(f"{client.user.name} is now online.\n")
 
 #TODO: Add api/web scraper for national day calendar
 
@@ -59,7 +59,7 @@ async def daily_poll():
 
     # Exit early if no announcement channels were found.
     if not target_channels:
-        print("No announcement channels found in any servers. Skipping poll creation.")
+        print("No announcement channels found in any servers. Skipping poll creation.\n")
         return
 
     answer_options = [
@@ -80,7 +80,7 @@ async def daily_poll():
     # Send the created poll to all found channels.
     for channel in target_channels:
         await channel.send(poll=poll)
-        print(f"Successfully posted poll in '{channel.name}' in server '{channel.guild.name}'.")
+        print(f"Successfully posted poll in '{channel.name}' in server '{channel.guild.name}'.\n")
     
 # Bot Commands
 @tree.command(name="hello", description="Say hi", guild=discord.Object(id=GUILD_ID))
@@ -89,7 +89,7 @@ async def test_command(interaction):
     """A test for slash command"""
     # await interaction.channel.send(f"hey, {interaction.user.mention}")
     await interaction.response.send_message(f"a secret hi to you <3", ephemeral=True)
-    print("Successfully sent message")
+    print("Successfully sent message\n")
 
 @tree.command(name="poll", description="generate a poll", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
@@ -110,7 +110,7 @@ async def test_poll_command(interaction):
             "I couldn't find an announcement channel in this server to post the poll.",
             ephemeral=True
         )
-        print(f"Failed to find announcement channel in '{interaction.guild.name}'.")
+        print(f"Failed to find announcement channel in '{interaction.guild.name}'.\n")
         return
 
     answer_options = [
@@ -129,7 +129,7 @@ async def test_poll_command(interaction):
 
     await target_channel.send(poll=test_poll)
     await interaction.response.send_message("Test poll created successfully, and sent to announcements", ephemeral=True)
-    print("Successfully sent test poll")
+    print("Successfully sent test poll\n")
 
 # Running and Logging
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
