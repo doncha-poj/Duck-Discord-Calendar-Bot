@@ -11,7 +11,6 @@ from zoneinfo import ZoneInfo
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD_ID = os.getenv('DISCORD_GUILD_ID') #FIXME: Remove once done
-POLL_CHANNEL_ID = int(os.getenv('DISCORD_POLL_CHANNEL_ID', 0)) #FIXME: Remove
 
 # Timezone set to US Eastern
 EASTERN = ZoneInfo("America/New_York")
@@ -32,11 +31,14 @@ async def on_ready():
         print("Daily poll task has been started.")
 
     # Sync the application commands to the specified guild
-    if GUILD_ID:
-        await tree.sync(guild=discord.Object(id=GUILD_ID)) #FIXME: Remove inside once done testing
+    if GUILD_ID: #FIXME: remove block later
+        await tree.sync(guild=discord.Object(id=GUILD_ID))
         print(f"Commands synced to guild {GUILD_ID}")
 
-    print(f"We are ready to go in, {client.user.name}")
+    await tree.sync() #FIXME: Uncomment once guild_id is not needed
+    print("Commands synced globally.")
+
+    print(f"{client.user.name} is now online")
 
 #TODO: Add api/web scraper for national day calendar
 
@@ -44,28 +46,70 @@ async def on_ready():
 @tasks.loop(time=time(6, 0, tzinfo=EASTERN))
 async def daily_poll():
     """A scheduled task to post a poll every day at 6:00 AM EST."""
-    channel = client.get_channel(POLL_CHANNEL_ID)
     print("It's 6:00 AM, creating a new native daily poll.")
+
+    # Find all valid channels across all servers first.
+    target_channels = []
+    for guild in client.guilds:
+        # Logic to find the announcement channel is now directly inside the loop.
+        for channel in guild.text_channels:
+            if channel.is_news():
+                target_channels.append(channel)
+                break  # Stop after finding the first one in this guild
+
+    # Exit early if no announcement channels were found.
+    if not target_channels:
+        print("No announcement channels found in any servers. Skipping poll creation.")
+        return
+
+    answer_options = [
+        "good",
+        "morning",
+        "usa",
+    ]
 
     # Create the native Discord Poll object
     poll = discord.Poll(
         question="good morning 🥰 happy ...",
         duration=timedelta(hours=8),  # 8 hours (6 AM to 2 PM)
-        multiple=False
     )
 
-    # Send the poll to the designated channel
-    await channel.send(poll=poll)
+    for option in answer_options:
+        poll.add_answer(text=option)
+
+    # Send the created poll to all found channels.
+    for channel in target_channels:
+        await channel.send(poll=poll)
+        print(f"Successfully posted poll in '{channel.name}' in server '{channel.guild.name}'.")
     
 # Bot Commands
 @tree.command(name="hello", description="Say hi", guild=discord.Object(id=GUILD_ID))
 async def test_command(interaction):
     """A test for slash command"""
-    await interaction.response.send_message(f"hi, {interaction.user.mention}")
+    # await interaction.channel.send(f"hey, {interaction.user.mention}")
+    await interaction.response.send_message(f"a secret hi to you <3", ephemeral=True)
+    print("Successfully sent message")
 
 @tree.command(name="poll", description="generate a poll", guild=discord.Object(id=GUILD_ID))
 async def test_poll_command(interaction):
     """Create a test version of the daily poll"""
+    print(f"Test poll triggered by {interaction.user.name} in server '{interaction.guild.name}'.")
+
+    # Find the announcement channel in the current server
+    target_channel = None
+    for channel in interaction.guild.text_channels:
+        if channel.is_news():
+            target_channel = channel
+            break  # Stop after finding the first one
+
+    if not target_channel:
+        # If no announcement channel is found, inform the user.
+        await interaction.response.send_message(
+            "I couldn't find an announcement channel in this server to post the poll.",
+            ephemeral=True
+        )
+        print(f"Failed to find announcement channel in '{interaction.guild.name}'.")
+        return
 
     answer_options = [
         "answer1",
@@ -75,12 +119,15 @@ async def test_poll_command(interaction):
 
     test_poll = discord.Poll(
         question="good morning 🥰 happy ...",
-        duration=timedelta(hours=8),  # 8 hours (6 AM to 2 PM)
-        multiple=False
+        duration=timedelta(hours=8)  # 8 hours (6 AM to 2 PM)
     )
 
-    discord.Message(poll=test_poll)
+    for option in answer_options:
+        test_poll.add_answer(text=option, emoji=None)
+
+    await target_channel.send(poll=test_poll)
     await interaction.response.send_message("Test poll created successfully", ephemeral=True)
+    print("Successfully sent test poll")
 
 # Running and Logging
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
