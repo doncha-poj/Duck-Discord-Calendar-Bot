@@ -84,6 +84,7 @@ async def daily_poll():
     
 # Bot Commands
 @tree.command(name="hello", description="Say hi", guild=discord.Object(id=GUILD_ID))
+@app_commands.checks.has_permissions(administrator=True)
 async def test_command(interaction):
     """A test for slash command"""
     # await interaction.channel.send(f"hey, {interaction.user.mention}")
@@ -91,6 +92,7 @@ async def test_command(interaction):
     print("Successfully sent message")
 
 @tree.command(name="poll", description="generate a poll", guild=discord.Object(id=GUILD_ID))
+@app_commands.checks.has_permissions(administrator=True)
 async def test_poll_command(interaction):
     """Create a test version of the daily poll"""
     print(f"Test poll triggered by {interaction.user.name} in server '{interaction.guild.name}'.")
@@ -126,7 +128,7 @@ async def test_poll_command(interaction):
         test_poll.add_answer(text=option, emoji=None)
 
     await target_channel.send(poll=test_poll)
-    await interaction.response.send_message("Test poll created successfully", ephemeral=True)
+    await interaction.response.send_message("Test poll created successfully, and sent to announcements", ephemeral=True)
     print("Successfully sent test poll")
 
 # Running and Logging
