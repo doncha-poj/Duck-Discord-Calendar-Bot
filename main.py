@@ -1,18 +1,17 @@
 import discord
-from discord.ext import commands
-from discord.ext import tasks
+from discord.ext import commands, tasks
 from discord import app_commands
 import logging
 from dotenv import load_dotenv
 import os
-from datetime import time
+from datetime import time, timedelta
 from zoneinfo import ZoneInfo
 
 # Environment Variables
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD_ID = os.getenv('GUILD_ID') #FIXME: Remove once done
-POLL_CHANNEL_ID = int(os.getenv('POLL_CHANNEL_ID', 0)) #FIXME: Remove
+GUILD_ID = os.getenv('DISCORD_GUILD_ID') #FIXME: Remove once done
+POLL_CHANNEL_ID = int(os.getenv('DISCORD_POLL_CHANNEL_ID', 0)) #FIXME: Remove
 
 # Timezone set to US Eastern
 EASTERN = ZoneInfo("America/New_York")
@@ -51,8 +50,7 @@ async def daily_poll():
     # Create the native Discord Poll object
     poll = discord.Poll(
         question="good morning 🥰 happy ...",
-        answers=["answer1", "answer2", "answer3"],
-        duration=28800,  # 8 hours (6 AM to 2 PM)
+        duration=timedelta(hours=8),  # 8 hours (6 AM to 2 PM)
         multiple=False
     )
 
@@ -60,15 +58,29 @@ async def daily_poll():
     await channel.send(poll=poll)
     
 # Bot Commands
-@tree.command(
-    name="hello",
-    description="Say hi",
-    guild=discord.Object(id=GUILD_ID)
-)
-
+@tree.command(name="hello", description="Say hi", guild=discord.Object(id=GUILD_ID))
 async def test_command(interaction):
     """A test for slash command"""
     await interaction.response.send_message(f"hi, {interaction.user.mention}")
+
+@tree.command(name="poll", description="generate a poll", guild=discord.Object(id=GUILD_ID))
+async def test_poll_command(interaction):
+    """Create a test version of the daily poll"""
+
+    answer_options = [
+        "answer1",
+        "answer2",
+        "answer3"
+    ]
+
+    test_poll = discord.Poll(
+        question="good morning 🥰 happy ...",
+        duration=timedelta(hours=8),  # 8 hours (6 AM to 2 PM)
+        multiple=False
+    )
+
+    discord.Message(poll=test_poll)
+    await interaction.response.send_message("Test poll created successfully", ephemeral=True)
 
 # Running and Logging
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
