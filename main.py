@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import tasks
 from discord import app_commands
 import logging
 from dotenv import load_dotenv
@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 # Environment Variables
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD_ID = os.getenv('DISCORD_GUILD_ID') #FIXME: Remove once done
+GUILD_ID = os.getenv('DISCORD_GUILD_ID') # For testing purposes
 
 # Timezone set to US Eastern
 EASTERN = ZoneInfo("America/New_York")
@@ -89,6 +89,14 @@ async def test_command(interaction):
     """A test for slash command"""
     # await interaction.channel.send(f"hey, {interaction.user.mention}")
     await interaction.response.send_message(f"a secret hi to you <3", ephemeral=True)
+    print("Successfully sent message\n")
+
+@tree.command(name="emoji", description="Sends a random emoji", guild=discord.Object(id=GUILD_ID))
+@app_commands.checks.has_permissions(administrator=True)
+async def test_command(interaction):
+    """A test for sending random emojis"""
+    # await interaction.response.send_message(f"hey, {interaction.user.mention}")
+    await interaction.response.send_message(f":flushed:", ephemeral=True) #TODO: Get unicode list of emojis
     print("Successfully sent message\n")
 
 @tree.command(name="poll", description="generate a poll", guild=discord.Object(id=GUILD_ID))
