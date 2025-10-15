@@ -42,18 +42,13 @@ def calendar_scrape():
         # Call the Gmail API
         service = build("gmail", "v1", credentials=creds)
         results = service.users().labels().list(userId="me").execute()
-        labels = results.get("labels", [])
 
-        if not labels:
-            print("No labels found.")
-            return
-        print("Labels:")
-        for label in labels:
-            print(label["name"])
 
+    # Error handling
     except HttpError as error:
-        # TODO(developer) - Handle errors from gmail API.
         print(f"An error occurred: {error}")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e} ")
 
 
 
