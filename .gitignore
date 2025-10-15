@@ -208,3 +208,4 @@ __marimo__/
 
 # Google API
 credentials.json
+token.json
