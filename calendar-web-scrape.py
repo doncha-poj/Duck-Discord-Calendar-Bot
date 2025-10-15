@@ -60,7 +60,33 @@ def calendar_scrape():
         # Get the most recent message
         msg_id = messages[0]["id"]
         message = service.users().messages().get(userId="me", id=msg_id, format="full").execute()
-        print(message)
+        # print(message)
+
+        # The email body is in the 'parts' or 'payload' section
+        payload = message.get("payload", {})
+        # print(payload)
+        parts = payload.get("parts", [])
+        # print(parts)
+
+        html_payload = ""
+        for part in parts:
+            if part["mimeType"] == "text/html":
+                data = part["body"]["data"]
+                # The data is base64url encoded, so we need to decode it
+                html_payload = base64.urlsafe_b64decode(data).decode("utf-8")
+                break
+        # print(html_payload)
+        if not html_payload:
+            print("Could not find HTML content in the email.")
+            return
+
+        # Save the HTML to a file so you can inspect it.
+        with open("email_content.html", "w", encoding="utf-8") as f:
+            f.write(html_payload)
+        print("Saved email content to email_content.html for inspection.")
+
+        # bs4 for parsing
+        soup = BeautifulSoup(html_payload, 'html.parser')
 
     # Error handling
     except HttpError as error:
