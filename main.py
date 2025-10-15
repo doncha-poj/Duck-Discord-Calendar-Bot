@@ -83,9 +83,16 @@ async def daily_poll():
         print(f"Successfully posted poll in '{channel.name}' in server '{channel.guild.name}'.\n")
     
 # Bot Commands
+@tree.command(name="help", description="list of commands and what they do", guild=discord.Object(id=GUILD_ID))
+async def help_command(interaction):
+    """A test for slash command"""
+    # await interaction.channel.send(f"hey, {interaction.user.mention}")
+    await interaction.response.send_message(f"Will implement soon", ephemeral=True)
+    print("Successfully sent message\n")
+
 @tree.command(name="hello", description="Say hi", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
-async def test_command(interaction):
+async def hello_command(interaction):
     """A test for slash command"""
     # await interaction.channel.send(f"hey, {interaction.user.mention}")
     await interaction.response.send_message(f"a secret hi to you <3", ephemeral=True)
@@ -93,7 +100,7 @@ async def test_command(interaction):
 
 @tree.command(name="emoji", description="Sends a random emoji", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
-async def test_command(interaction):
+async def rand_emoji_command(interaction):
     """A test for sending random emojis"""
     # await interaction.response.send_message(f"hey, {interaction.user.mention}")
     await interaction.response.send_message(f":flushed:", ephemeral=True) #TODO: Get unicode list of emojis
