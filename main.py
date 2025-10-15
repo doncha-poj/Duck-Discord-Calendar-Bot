@@ -1,6 +1,6 @@
 import discord
 from discord.ext import tasks
-from discord import app_commands
+from discord import app_commands, Status
 import logging
 from dotenv import load_dotenv
 import os
@@ -39,6 +39,9 @@ async def on_ready():
     print("Commands synced globally.")
 
     print(f"{client.user.name} is now online.\n")
+    game = discord.Game("with the API")
+    await client.change_presence(activity=game)
+
 
 #TODO: Add api/web scraper for national day calendar
 
