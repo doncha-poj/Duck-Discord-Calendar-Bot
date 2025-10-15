@@ -1,4 +1,7 @@
 import os.path
+import base64
+from bs4 import BeautifulSoup
+import datetime
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -41,8 +44,23 @@ def calendar_scrape():
         creds = get_credentials()
         # Call the Gmail API
         service = build("gmail", "v1", credentials=creds)
-        results = service.users().labels().list(userId="me").execute()
+        print("Successfully connected to Gmail API.")
 
+        # Search for latest email from newsletter
+        sender = "newsletter@mail.nationaldaycalendar.com"
+        query = f"from:{sender}"
+        results = service.users().messages().list(userId="me", q=query, maxResults=1).execute()
+
+        messages = results.get("messages", [])
+
+        if not messages:
+            print(f"No emails found from {sender}")
+            return
+
+        # Get the most recent message
+        msg_id = messages[0]["id"]
+        message = service.users().messages().get(userId="me", id=msg_id, format="full").execute()
+        print(message)
 
     # Error handling
     except HttpError as error:
