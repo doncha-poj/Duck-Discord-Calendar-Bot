@@ -10,9 +10,9 @@ from googleapiclient.errors import HttpError
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
-def main():
+def get_credentials():
     """Shows basic usage of the Gmail API.
-    Lists the user's Gmail labels.
+    Handles authentication and returns creds
     """
     creds = None
     # The file token.json stores the user's access and refresh tokens, and is
@@ -32,8 +32,13 @@ def main():
         # Save the credentials for the next run
         with open("token.json", "w") as token:
           token.write(creds.to_json())
+    return creds
 
+def calendar_scrape():
+    """Scrapes the national days from email
+    """
     try:
+        creds = get_credentials()
         # Call the Gmail API
         service = build("gmail", "v1", credentials=creds)
         results = service.users().labels().list(userId="me").execute()
@@ -51,5 +56,7 @@ def main():
         print(f"An error occurred: {error}")
 
 
-if __name__ == "__main__":
-  main()
+
+
+if __name__ == "__calendar_scrape__":
+  calendar_scrape()
