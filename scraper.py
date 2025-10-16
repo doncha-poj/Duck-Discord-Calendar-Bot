@@ -15,7 +15,7 @@ from googleapiclient.errors import HttpError
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 
-def get_credentials():
+def _get_credentials():
     """Shows basic usage of the Gmail API.
     Handles authentication and returns creds
     """
@@ -39,7 +39,7 @@ def get_credentials():
           token.write(creds.to_json())
     return creds
 
-def html_scrape(html_file: str) -> list[str]:
+def _html_scrape(html_file: str) -> list[str]:
     """Grabs the national days from html"""
 
     def clean_text(text: str) -> str:
@@ -63,14 +63,14 @@ def html_scrape(html_file: str) -> list[str]:
     holidays = []
 
     # Get today's date
-    today = datetime.date.today()
-    date_string = today.strftime("%B %d, %Y").upper()
+    today_str = datetime.date.today()
+    date_string = today_str.strftime("%B %d, %Y").upper()
     # print(date_string)
 
     date_tag = soup.find(string=re.compile(date_string, re.IGNORECASE))
 
     if date_tag:
-        # 3. The pipe-separated list is in the parent <span> of the date tag.
+        # The pipe-separated list is in the parent <span> of the date tag.
         parent_span = date_tag.find_parent('span')
         if parent_span:
             # Get the raw text, which includes the date and all holidays.
@@ -83,24 +83,13 @@ def html_scrape(html_file: str) -> list[str]:
             # We also strip extra whitespace from each holiday name.
             holidays = [clean_text(part.strip()) for part in parts[1:]]
 
-        if holidays:
-            print("\n" + "="*40)
-            print(f"    National Days for {today}")
-            print("="*40)
-            for day in holidays:
-                print(f"- {day}")
-            print("="*40)
-        else:
-            today = datetime.date.today().strftime("%B %d, %Y").upper()
-            print(f"Could not find the date '{today}' or parse holidays from the email.")
-
     return holidays
 
-def calendar_scrape():
+def get_todays_holidays():
     """Scrapes the national days from email
     """
     try:
-        creds = get_credentials()
+        creds = _get_credentials()
         # Call the Gmail API
         service = build("gmail", "v1", credentials=creds)
         print("Successfully connected to Gmail API.")
@@ -114,12 +103,12 @@ def calendar_scrape():
 
         if not messages:
             print(f"No emails found from {sender}")
-            return
+            return []
 
         # Get the most recent message
         msg_id = messages[0]["id"]
         message = service.users().messages().get(userId="me", id=msg_id, format="full").execute()
-        print(message)
+        # print(message)
 
         # The email body is in the 'parts' or 'payload' section
         payload = message.get("payload", {})
@@ -135,29 +124,51 @@ def calendar_scrape():
         # print(html_payload)
         if not html_payload:
             print("Could not find HTML content in the email.")
-            return
+            return []
 
-        # Save the HTML to a file so you can inspect it.
-        with open("email_content.html", "w", encoding="utf-8") as f:
-            f.write(html_payload)
-        print("Saved email content to email_content.html for inspection.")
-
-        holidays = html_scrape(html_file=html_payload)
+        if html_payload:
+            # Save the fresh HTML to a file for future local testing
+            with open("email_content.html", "w", encoding="utf-8") as f:
+                f.write(html_payload)
+            print("Saved fresh email content to email_content.html.")
+            return _html_scrape(html_payload)
+        else:
+            print("Could not find HTML content in the email.")
+            return []
 
     # Error handling
     except HttpError as error:
         print(f"An error occurred: {error}")
+        return []
     except Exception as e:
         print(f"An unexpected error occurred: {e} ")
+        return []
 
 
-
-
+# Only runs if this file is executed directly
 if __name__ == "__main__":
-    filepath = "email_content.html"
-    with open(filepath, 'r') as f:
-        content = f.read()
-        # print(f"Content from '{filepath}':\n{content}")
-        html_scrape(html_file=content)
-    #     holidays = html_scrape(html_file=content)
-    # print(holidays)
+    holidays = []
+
+    # Check if a local HTML file exists for testing
+    if os.path.exists("email_content.html"):
+        print("Found local 'email_content.html'. Parsing from file to avoid API call...")
+        with open("email_content.html", 'r', encoding='utf-8') as f:
+            local_html_content = f.read()
+        holidays = _html_scrape(local_html_content)
+    else:
+        # If no local file, call the main function to fetch from the API
+        print("No local 'email_content.html' found. Fetching from Gmail API...")
+        holidays = get_todays_holidays()
+
+    # Print the results, regardless of where they came from
+    if holidays:
+        today_str = datetime.date.today().strftime("%B %d, %Y")
+        print("\n" + "=" * 40)
+        print(f"    National Days for {today_str}")
+        print("=" * 40)
+        for day in holidays:
+            print(f"- {day}")
+        print("=" * 40)
+    else:
+        today = datetime.date.today().strftime("%B %d, %Y").upper()
+        print(f"Could not find the date '{today}' or parse holidays from the email.")
