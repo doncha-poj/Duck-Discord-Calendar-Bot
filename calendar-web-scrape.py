@@ -37,6 +37,10 @@ def get_credentials():
           token.write(creds.to_json())
     return creds
 
+def html_scrape(html_file):
+    """Grabs the national days from html"""
+    
+
 def calendar_scrape():
     """Scrapes the national days from email
     """
@@ -60,13 +64,11 @@ def calendar_scrape():
         # Get the most recent message
         msg_id = messages[0]["id"]
         message = service.users().messages().get(userId="me", id=msg_id, format="full").execute()
-        # print(message)
+        print(message)
 
         # The email body is in the 'parts' or 'payload' section
         payload = message.get("payload", {})
-        # print(payload)
         parts = payload.get("parts", [])
-        # print(parts)
 
         html_payload = ""
         for part in parts:
@@ -85,8 +87,7 @@ def calendar_scrape():
             f.write(html_payload)
         print("Saved email content to email_content.html for inspection.")
 
-        # bs4 for parsing
-        soup = BeautifulSoup(html_payload, 'html.parser')
+        holidays = html_scrape(html_file=html_payload)
 
     # Error handling
     except HttpError as error:
@@ -97,5 +98,9 @@ def calendar_scrape():
 
 
 
-if __name__ == "__calendar_scrape__":
-  calendar_scrape()
+if __name__ == "__main__":
+    if os.path.exists("email_content.html"):
+        print("performing scrape")
+        html_scrape("email_content.html")
+    else:
+        print("nope")
