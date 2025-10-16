@@ -1,5 +1,7 @@
 import os.path
 import base64
+import re
+
 from bs4 import BeautifulSoup
 import datetime
 
@@ -45,9 +47,34 @@ def html_scrape(html_file):
     # Get today's date
     today = datetime.date.today()
     date_string = today.strftime("%B %d, %Y").upper()
-    print(date_string)
+    # print(date_string)
 
-    date_tag = soup.find()
+    date_tag = soup.find(string=re.compile(date_string, re.IGNORECASE))
+
+    if date_tag:
+        # 3. The pipe-separated list is in the parent <span> of the date tag.
+        parent_span = date_tag.find_parent('span')
+        if parent_span:
+            # Get the raw text, which includes the date and all holidays.
+            full_text = parent_span.get_text(separator=' ', strip=True)
+
+            # Split the string by the pipe character.
+            parts = full_text.split('|')
+
+            # The first part is the date, so we take everything after it.
+            # We also strip extra whitespace from each holiday name.
+            holidays = [part.strip() for part in parts[1:]]
+
+        if holidays:
+            print("\n" + "="*40)
+            print(f"    National Days for {today}")
+            print("="*40)
+            for day in holidays:
+                print(f"- {day}")
+            print("="*40)
+        else:
+            today = datetime.date.today().strftime("%B %d, %Y").upper()
+            print(f"Could not find the date '{today}' or parse holidays from the email.")
 
     return holidays
 
@@ -114,3 +141,5 @@ if __name__ == "__main__":
         content = f.read()
         # print(f"Content from '{filepath}':\n{content}")
         html_scrape(html_file=content)
+    #     holidays = html_scrape(html_file=content)
+    # print(holidays)
