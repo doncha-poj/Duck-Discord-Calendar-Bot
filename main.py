@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 from datetime import time, timedelta
 from zoneinfo import ZoneInfo
+import scraper
 
 # Environment Variables
 load_dotenv()
@@ -43,8 +44,6 @@ async def on_ready():
     await client.change_presence(activity=game)
 
 
-#TODO: Add api/web scraper for national day calendar
-
 # Scheduled Polling 
 @tasks.loop(time=time(6, 0, tzinfo=EASTERN))
 async def daily_poll():
@@ -65,17 +64,29 @@ async def daily_poll():
         print("No announcement channels found in any servers. Skipping poll creation.\n")
         return
 
-    answer_options = [
-        "good",
-        "morning",
-        "usa",
-    ]
-
     # Create the native Discord Poll object
     poll = discord.Poll(
         question="good morning 🥰 happy ...",
         duration=timedelta(hours=8),  # 8 hours (6 AM to 2 PM)
     )
+
+    # Fill answer options with holidays from today
+    answer_options = scraper.get_todays_holidays()
+    if not answer_options:
+        print("Holiday list is empty\nReturning dummy list.")
+
+        poll = discord.Poll(
+            question="good morning 🥰 rate your morning",
+            duration=timedelta(hours=8),  # 8 hours (6 AM to 2 PM)
+        )
+
+        answer_options = [
+            "5 (Awesome Sauce)",
+            "4 (Cool Beans)",
+            "3 (Lukewarm)",
+            "2 (Ehhh)",
+            "1 (sad)"
+        ]
 
     for option in answer_options:
         poll.add_answer(text=option)
