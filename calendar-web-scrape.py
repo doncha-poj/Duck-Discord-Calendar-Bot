@@ -39,8 +39,26 @@ def get_credentials():
           token.write(creds.to_json())
     return creds
 
-def html_scrape(html_file):
+def html_scrape(html_file: str) -> list[str]:
     """Grabs the national days from html"""
+
+    def clean_text(text: str) -> str:
+        """Replaces common Unicode symbols with their ASCII equivalents."""
+        replacements = {
+            '\u2122': '(TM)',  # Trademark
+            '\u00ae': '(R)',  # Registered
+            '\u00a9': '(C)',  # Copyright
+            '\u2013': '-',  # En Dash
+            '\u2014': '-',  # Em Dash
+            '\u2026': '...',  # Ellipsis
+            '\u2019': "'",  # Smart Apostrophe
+            '\u201c': '"',  # Smart Quote
+            '\u201d': '"',  # Smart Quote
+        }
+        for unicode_char, ascii_char in replacements.items():
+            text = text.replace(unicode_char, ascii_char)
+        return text
+
     soup = BeautifulSoup(html_file, 'html.parser')
     holidays = []
 
@@ -63,7 +81,7 @@ def html_scrape(html_file):
 
             # The first part is the date, so we take everything after it.
             # We also strip extra whitespace from each holiday name.
-            holidays = [part.strip() for part in parts[1:]]
+            holidays = [clean_text(part.strip()) for part in parts[1:]]
 
         if holidays:
             print("\n" + "="*40)
