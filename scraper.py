@@ -60,11 +60,11 @@ def _html_scrape(html_file: str) -> list[str]:
         return text
 
     soup = BeautifulSoup(html_file, 'html.parser')
-    holidays = []
+    holiday_list = []
 
     # Get today's date
-    today_str = datetime.date.today()
-    date_string = today_str.strftime("%B %d, %Y").upper()
+    today_str_format = datetime.date.today()
+    date_string = today_str_format.strftime("%B %d, %Y").upper()
     # print(date_string)
 
     date_tag = soup.find(string=re.compile(date_string, re.IGNORECASE))
@@ -81,9 +81,9 @@ def _html_scrape(html_file: str) -> list[str]:
 
             # The first part is the date, so we take everything after it.
             # We also strip extra whitespace from each holiday name.
-            holidays = [clean_text(part.strip()) for part in parts[1:]]
+            holiday_list = [clean_text(part.strip()) for part in parts[1:]]
 
-    return holidays
+    return holiday_list
 
 def get_todays_holidays():
     """Scrapes the national days from email
