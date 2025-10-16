@@ -39,7 +39,17 @@ def get_credentials():
 
 def html_scrape(html_file):
     """Grabs the national days from html"""
-    
+    soup = BeautifulSoup(html_file, 'html.parser')
+    holidays = []
+
+    # Get today's date
+    today = datetime.date.today()
+    date_string = today.strftime("%B %d, %Y").upper()
+    print(date_string)
+
+    date_tag = soup.find()
+
+    return holidays
 
 def calendar_scrape():
     """Scrapes the national days from email
@@ -99,8 +109,8 @@ def calendar_scrape():
 
 
 if __name__ == "__main__":
-    if os.path.exists("email_content.html"):
-        print("performing scrape")
-        html_scrape("email_content.html")
-    else:
-        print("nope")
+    filepath = "email_content.html"
+    with open(filepath, 'r') as f:
+        content = f.read()
+        # print(f"Content from '{filepath}':\n{content}")
+        html_scrape(html_file=content)
