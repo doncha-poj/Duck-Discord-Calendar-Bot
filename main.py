@@ -64,16 +64,14 @@ async def daily_poll():
         print("No announcement channels found in any servers. Skipping poll creation.\n")
         return
 
-    # Create the native Discord Poll object
-    poll = discord.Poll(
-        question="good morning 🥰 happy ...",
-        duration=timedelta(hours=8),  # 8 hours (6 AM to 2 PM)
-    )
-
-    # Fill answer options with holidays from today
+    # Fetch answer options with holidays from today
     answer_options = scraper.get_todays_holidays()
+    if answer_options:
+        answer_options = answer_options[:10]  # Take a slice of the first 10 items
+
+
     if not answer_options:
-        print("Holiday list is empty\nReturning dummy list.")
+        print("Holiday list is empty. Using fallback list.")
 
         poll = discord.Poll(
             question="good morning 🥰 rate your morning",
@@ -87,6 +85,12 @@ async def daily_poll():
             "2 (Ehhh)",
             "1 (sad)"
         ]
+    else:
+        # Create the native Discord Poll object
+        poll = discord.Poll(
+            question="good morning 🥰 happy ...",
+            duration=timedelta(hours=8),  # 8 hours (6 AM to 2 PM)
+        )
 
     for option in answer_options:
         poll.add_answer(text=option)
@@ -115,6 +119,14 @@ async def hello_command(interaction):
 @tree.command(name="emoji", description="Sends a random emoji", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
 async def rand_emoji_command(interaction):
+    """A test for sending random emojis"""
+    # await interaction.response.send_message(f"hey, {interaction.user.mention}")
+    await interaction.response.send_message(f":flushed:", ephemeral=True) #TODO: Get unicode list of emojis
+    print("Successfully sent message\n")
+
+@tree.command(name="national-days", description="Lists the national days for today", guild=discord.Object(id=GUILD_ID))
+@app_commands.checks.has_permissions(administrator=True)
+async def holiday_list_command(interaction):
     """A test for sending random emojis"""
     # await interaction.response.send_message(f"hey, {interaction.user.mention}")
     await interaction.response.send_message(f":flushed:", ephemeral=True) #TODO: Get unicode list of emojis
