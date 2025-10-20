@@ -1,3 +1,4 @@
+import random
 import discord
 from discord.ext import tasks
 from discord import app_commands
@@ -136,10 +137,15 @@ async def hello_command(interaction):
 @tree.command(name="emoji", description="Sends a random emoji", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
 async def rand_emoji_command(interaction):
-    """A test for sending random emojis"""
-    # await interaction.response.send_message(f"hey, {interaction.user.mention}")
-    await interaction.response.send_message(f":flushed:", ephemeral=True) #TODO: Get unicode list of emojis
-    print("Successfully sent message\n")
+    """Sends a randomly selected emoji to the user."""
+    # A list of standard Unicode emojis
+    emoji_list = ["😀", "😂", "🥰", "🤔", "🤯", "🥳", "👍", "👎", "🚀", "🎉", "🔥", "💯"]
+
+    # Use random.choice() to pick one emoji from the list
+    random_emoji = random.choice(emoji_list)
+
+    await interaction.response.send_message(f"Here is your random emoji: {random_emoji}", ephemeral=True)
+    print(f"Sent random emoji {random_emoji} to {interaction.user.name}.\n")
 
 @tree.command(name="national-days", description="Lists the national days for today", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
