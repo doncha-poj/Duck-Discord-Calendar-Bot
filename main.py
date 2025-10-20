@@ -1,10 +1,10 @@
 import discord
 from discord.ext import tasks
-from discord import app_commands, Status
+from discord import app_commands
 import logging
 from dotenv import load_dotenv
 import os
-from datetime import time, timedelta
+from datetime import time, timedelta, date
 from zoneinfo import ZoneInfo
 import scraper
 
@@ -22,6 +22,9 @@ intents.message_content = True
 intents.members = True
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
+
+# Global variable to store holidays
+global_holiday_list = []
 
 # Bot Events
 @client.event
@@ -65,7 +68,10 @@ async def daily_poll():
         return
 
     # Fetch answer options with holidays from today
-    answer_options = scraper.get_todays_holidays()
+    global global_holiday_list
+    global_holiday_list = scraper.get_todays_holidays()
+
+    answer_options = global_holiday_list
     if answer_options:
         answer_options = answer_options[:10]  # Take a slice of the first 10 items
 
@@ -103,10 +109,21 @@ async def daily_poll():
 # Bot Commands
 @tree.command(name="help", description="list of commands and what they do", guild=discord.Object(id=GUILD_ID))
 async def help_command(interaction):
-    """A test for slash command"""
-    # await interaction.channel.send(f"hey, {interaction.user.mention}")
-    await interaction.response.send_message(f"Will implement soon", ephemeral=True)
-    print("Successfully sent message\n")
+    """Displays a helpful embed with a list of all commands."""
+
+    embed = discord.Embed(
+        title="🤖 Bot Commands",
+        description="Here is a list of all the commands you can use:",
+        color=discord.Color.blue()
+    )
+
+    embed.add_field(name="`/nationalday`", value="Lists the national days for today. (Admin Only)", inline=False)
+    embed.add_field(name="`/poll`", value="Manually posts a test version of the daily poll. (Admin Only)", inline=False)
+    embed.add_field(name="`/hello`", value="A simple test command to see if the bot is responsive. (Admin Only)", inline=False)
+    embed.add_field(name="`/help`", value="Shows this help message.", inline=False)
+
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+    print("Help command executed.\n")
 
 @tree.command(name="hello", description="Say hi", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
@@ -127,10 +144,26 @@ async def rand_emoji_command(interaction):
 @tree.command(name="national-days", description="Lists the national days for today", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
 async def holiday_list_command(interaction):
-    """A test for sending random emojis"""
-    # await interaction.response.send_message(f"hey, {interaction.user.mention}")
-    await interaction.response.send_message(f":flushed:", ephemeral=True) #TODO: Get unicode list of emojis
-    print("Successfully sent message\n")
+    """Displays the cached list of today's national holidays in an embed."""
+    # Use the cached global list
+    holidays = global_holiday_list
+
+    if holidays:
+        today_str = date.today().strftime('%B %d, %Y')
+        embed = discord.Embed(
+            title=f"🎉 Today's National Days! ({today_str})",
+            description="\n".join(f"• {day}" for day in holidays),
+            color=discord.Color.gold()
+        )
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+        print("Successfully sent holiday list embed.\n")
+    else:
+        await interaction.response.send_message(
+            "The holiday list is currently empty. It will be updated at 6 AM EST, or you can try again later.",
+            ephemeral=True
+        )
+        print("Holiday list was empty when command was run.\n")
+
 
 @tree.command(name="poll", description="generate a poll", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
@@ -155,13 +188,13 @@ async def test_poll_command(interaction):
         return
 
     answer_options = [
-        "answer1",
-        "answer2",
-        "answer3"
+        "red",
+        "yellow",
+        "blue"
     ]
 
     test_poll = discord.Poll(
-        question="good morning 🥰 happy ...",
+        question="ignore. this is a test poll, but since you are reading this still... color?",
         duration=timedelta(hours=8)  # 8 hours (6 AM to 2 PM)
     )
 
