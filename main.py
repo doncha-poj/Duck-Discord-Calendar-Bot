@@ -178,24 +178,24 @@ async def holiday_list_command(interaction):
 @tree.command(name="poll", description="generate a poll", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
 async def test_poll_command(interaction):
-    """Create a test version of the daily poll"""
+    """Create a test version of the daily poll in the current channel"""
     print(f"Test poll triggered by {interaction.user.name} in server '{interaction.guild.name}'.")
 
     # Find the announcement channel in the current server
-    target_channel = None
-    for channel in interaction.guild.text_channels:
-        if channel.is_news():
-            target_channel = channel
-            break  # Stop after finding the first one
-
-    if not target_channel:
-        # If no announcement channel is found, inform the user.
-        await interaction.response.send_message(
-            "I couldn't find an announcement channel in this server to post the poll.",
-            ephemeral=True
-        )
-        print(f"Failed to find announcement channel in '{interaction.guild.name}'.\n")
-        return
+    # target_channel = None
+    # for channel in interaction.guild.text_channels:
+    #     if channel.is_news():
+    #         target_channel = channel
+    #         break  # Stop after finding the first one
+    #
+    # if not target_channel:
+    #     # If no announcement channel is found, inform the user.
+    #     await interaction.response.send_message(
+    #         "I couldn't find an announcement channel in this server to post the poll.",
+    #         ephemeral=True
+    #     )
+    #     print(f"Failed to find announcement channel in '{interaction.guild.name}'.\n")
+    #     return
 
     answer_options = [
         "red",
@@ -211,8 +211,9 @@ async def test_poll_command(interaction):
     for option in answer_options:
         test_poll.add_answer(text=option, emoji=None)
 
-    await target_channel.send(poll=test_poll)
-    await interaction.response.send_message("Test poll created successfully, and sent to announcements", ephemeral=True)
+    # await target_channel.send(poll=test_poll)
+    await interaction.channel.send(poll=test_poll)
+    await interaction.response.send_message("Test poll created successfully", ephemeral=True)
     print("Successfully sent test poll\n")
 
 # Running and Logging
