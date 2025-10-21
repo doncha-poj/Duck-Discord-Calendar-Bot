@@ -121,8 +121,9 @@ async def help_command(interaction):
         color=discord.Color.blue()
     )
 
-    embed.add_field(name="`/hello`", value="A simple test command to see if the bot is responsive. (Admin Only)", inline=False)
     embed.add_field(name="`/help`", value="Shows this help message.", inline=False)
+    embed.add_field(name="`/emoji`", value="Sends a random emoji", inline=False)
+    embed.add_field(name="`/hello`", value="A simple test command to see if the bot is responsive. (Admin Only)", inline=False)
     embed.add_field(name="`/poll`", value="Manually posts a test version of the daily poll. (Admin Only)", inline=False)
     embed.add_field(name="`/nationalday`", value="Lists the national days for today. (Admin Only)", inline=False)
 
