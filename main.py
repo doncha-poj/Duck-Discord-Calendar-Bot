@@ -99,8 +99,11 @@ async def daily_poll():
             duration=timedelta(hours=8),  # 8 hours (6 AM to 2 PM)
         )
 
+    # Hardcoded cuz fuck it
+    emoji_list = ["😀", "😂", "🥰", "🤔", "🤯", "🥳", "👍", "👎", "🚀", "🎉", "🔥", "💯"]
+
     for option in answer_options:
-        poll.add_answer(text=option)
+        poll.add_answer(text=option, emoji=random.choice(emoji_list))
 
     # Send the created poll to all found channels.
     for channel in target_channels:
@@ -118,10 +121,10 @@ async def help_command(interaction):
         color=discord.Color.blue()
     )
 
-    embed.add_field(name="`/nationalday`", value="Lists the national days for today. (Admin Only)", inline=False)
-    embed.add_field(name="`/poll`", value="Manually posts a test version of the daily poll. (Admin Only)", inline=False)
     embed.add_field(name="`/hello`", value="A simple test command to see if the bot is responsive. (Admin Only)", inline=False)
     embed.add_field(name="`/help`", value="Shows this help message.", inline=False)
+    embed.add_field(name="`/poll`", value="Manually posts a test version of the daily poll. (Admin Only)", inline=False)
+    embed.add_field(name="`/nationalday`", value="Lists the national days for today. (Admin Only)", inline=False)
 
     await interaction.response.send_message(embed=embed, ephemeral=True)
     print("Help command executed.\n")
