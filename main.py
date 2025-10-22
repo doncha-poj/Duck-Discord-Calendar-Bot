@@ -181,7 +181,7 @@ async def holiday_list_command(interaction):
     app_commands.Choice(name="Colors", value="colors"),
     app_commands.Choice(name="Holidays", value="holidays")
 ])
-async def test_poll_command(interaction, poll_answer_options):
+async def test_poll_command(interaction: discord.Interaction, poll_answer_options: str):
     """Create a test version of the daily poll in the current channel"""
     print(f"Test poll triggered by {interaction.user.name} in server '{interaction.guild.name}'.")
 
@@ -201,6 +201,7 @@ async def test_poll_command(interaction, poll_answer_options):
     #     print(f"Failed to find announcement channel in '{interaction.guild.name}'.\n")
     #     return
 
+    answer_options = []
     if poll_answer_options == "colors":
         answer_options = [
             "red",
