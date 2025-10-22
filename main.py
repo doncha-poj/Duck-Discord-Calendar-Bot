@@ -81,7 +81,7 @@ async def daily_poll():
         print("Holiday list is empty. Using fallback list.")
 
         poll = discord.Poll(
-            question="good morning 🥰 rate your morning",
+            question="good morning 🥰 how are you feeling?",
             duration=timedelta(hours=8),  # 8 hours (6 AM to 2 PM)
         )
 
@@ -100,7 +100,7 @@ async def daily_poll():
         )
 
     # Hardcoded cuz fuck it
-    emoji_list = ["😀", "😂", "🥰", "🤔", "🤯", "🥳", "👍", "👎", "🚀", "🎉", "🔥", "💯"]
+    emoji_list = ["😀", "😂", "🥰", "🤔", "🤯", "🥳", "👍", "🚀", "🎉", "🔥", "💯", "😁"]
 
     for option in answer_options:
         poll.add_answer(text=option, emoji=random.choice(emoji_list))
