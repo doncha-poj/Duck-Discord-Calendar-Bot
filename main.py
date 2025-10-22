@@ -112,6 +112,7 @@ async def daily_poll():
     
 # Bot Commands
 @tree.command(name="help", description="list of commands and what they do", guild=discord.Object(id=GUILD_ID))
+@app_commands.checks.has_permissions(administrator=True)
 async def help_command(interaction):
     """Displays a helpful embed with a list of all commands."""
 
