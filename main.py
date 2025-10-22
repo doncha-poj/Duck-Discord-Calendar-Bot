@@ -177,7 +177,11 @@ async def holiday_list_command(interaction):
 
 @tree.command(name="poll", description="generate a poll", guild=discord.Object(id=GUILD_ID))
 @app_commands.checks.has_permissions(administrator=True)
-async def test_poll_command(interaction):
+@app_commands.choices(poll_answer_options=[
+    app_commands.Choice(name="Colors", value="colors"),
+    app_commands.Choice(name="Holidays", value="holidays")
+])
+async def test_poll_command(interaction, poll_answer_options):
     """Create a test version of the daily poll in the current channel"""
     print(f"Test poll triggered by {interaction.user.name} in server '{interaction.guild.name}'.")
 
@@ -197,15 +201,24 @@ async def test_poll_command(interaction):
     #     print(f"Failed to find announcement channel in '{interaction.guild.name}'.\n")
     #     return
 
-    answer_options = [
-        "red",
-        "yellow",
-        "blue"
-    ]
+    if poll_answer_options == "colors":
+        answer_options = [
+            "red",
+            "yellow",
+            "blue"
+        ]
+    elif poll_answer_options == "holidays":
+        answer_options = global_holiday_list
+    else:
+        answer_options = [
+            "red",
+            "yellow",
+            "blue"
+        ]
 
     test_poll = discord.Poll(
         question="ignore. this is a test poll, but since you are reading this still... color?",
-        duration=timedelta(hours=8)  # 8 hours (6 AM to 2 PM)
+        duration=timedelta(hours=1)  # 8 hours (6 AM to 2 PM)
     )
 
     for option in answer_options:
