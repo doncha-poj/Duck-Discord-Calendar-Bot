@@ -1,2 +1,2 @@
 # Duck-Discord-Calendar-Bot
-For a daily poll
+Releases a daily poll for the national day calendar
