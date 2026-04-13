@@ -1,0 +1,16 @@
+services:
+  duck-bot:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: duck-discord-bot
+    restart: unless-stopped
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_GUILD_ID=${DISCORD_GUILD_ID}
+    volumes:
+      # Map your local credential files into the container
+      - ./token.json:/app/token.json
+      - ./credentials.json:/app/credentials.json
+      # Optional: persist the scraped HTML for debugging
+      - ./email_content.html:/app/email_content.html
